@@ -121,9 +121,24 @@ class Onvif with UiLoggy {
     } catch (error) {
       loggy.warning('GetServices command not supported');
     } finally {
-      final capabilities = await deviceManagement.getCapabilities();
+      final capabilities = await deviceManagement.getServices(true);
+      for(var i=0; i<capabilities.length; i++){
+        if(capabilities[i].nameSpace.contains('media')){
+          if (capabilities[i]?.xAddr != null) {
+            _media = Media(
+                onvif: this, uri: _serviceUriOfHost(capabilities[i]!.xAddr));
+          }
+        }
 
-      if (capabilities.media?.xaddr != null) {
+        if(capabilities[i].nameSpace.contains('PTZ')){
+          if (capabilities[i]?.xAddr != null) {
+            _ptz =
+                Ptz(onvif: this, uri: _serviceUriOfHost(capabilities[i]!.xAddr));
+          }
+        }
+
+      }
+      /*if (capabilities.media?.xaddr != null) {
         _media = Media(
             onvif: this, uri: _serviceUriOfHost(capabilities.media!.xaddr));
       }
@@ -131,7 +146,7 @@ class Onvif with UiLoggy {
       if (capabilities.ptz?.xAddr != null) {
         _ptz =
             Ptz(onvif: this, uri: _serviceUriOfHost(capabilities.ptz!.xAddr));
-      }
+      }*/
     }
 
     loggy.info('initialization complete');
